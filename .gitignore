@@ -1,1 +1,5 @@
 .venv/
+Tutorials/
+.env/
+__pycache__/
+environment.yml
