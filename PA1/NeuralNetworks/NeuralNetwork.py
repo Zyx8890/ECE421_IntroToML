@@ -20,7 +20,7 @@ def fit_NeuralNetwork(X_train,y_train,alpha,hidden_layer_sizes,epochs):
         epochs: Number of training epochs
     
     Returns:
-        errors: List of total errors per epoch
+        errors: List of average errors per epoch
         weights: Final trained weights
     """
     N, d = X_train.shape
@@ -29,22 +29,22 @@ def fit_NeuralNetwork(X_train,y_train,alpha,hidden_layer_sizes,epochs):
     layer_sizes = [d] + hidden_layer_sizes + [1]  # [input, hidden1, hidden2, ..., output]
     L = len(layer_sizes)  # Total number of layers
     
-    # Initialize weights with He initialization for ReLU
+    # Initialize weights
     weights = []
     for l in range(L - 1):
         # weights[l] has shape (d^l + 1) x d^(l+1)
         # +1 for bias in the input layer
-        # He initialization: scale by sqrt(2 / fan_in)
-        fan_in = layer_sizes[l]
-        w = np.random.randn(layer_sizes[l] + 1, layer_sizes[l + 1]) * np.sqrt(2.0 / fan_in)
+        w = np.random.normal(0, 0.1, (layer_sizes[l] + 1, layer_sizes[l + 1]))
         weights.append(w)
     
     # Training loop
     errors = []
     for epoch in range(epochs):
+        indices = np.arange(N)
+        np.random.shuffle(indices)
         epoch_error = 0
         
-        for n in range(N):
+        for n in indices:
             # Prepare input with bias
             x_n = np.concatenate([[1], X_train[n]])  # Add bias (prepend 1)
             y_n = y_train[n]
@@ -62,7 +62,7 @@ def fit_NeuralNetwork(X_train,y_train,alpha,hidden_layer_sizes,epochs):
             # Update weights
             weights = updateWeights(weights, gradients, alpha)
         
-        errors.append(epoch_error)
+        errors.append(epoch_error/N)
     
     return errors, weights
     
@@ -271,13 +271,13 @@ def plotErr(e,epochs):
     plt.figure()
     plt.plot(range(epochs), e)
     plt.xlabel('Epochs')
-    plt.ylabel('Total Error')
+    plt.ylabel('Average Error')
     plt.title('Error vs Epochs')
     plt.show()
     
 def test_SciKit(X_train, X_test, Y_train, Y_test):
     # Use scikit-learn MLPClassifier for comparison
-    clf = MLPClassifier(solver='adam', alpha=1e-5, hidden_layer_sizes=(8,), random_state=1, max_iter=100)
+    clf = MLPClassifier(solver='adam', alpha=1e-5, hidden_layer_sizes=(30,10), random_state=1, max_iter=100)
     clf.fit(X_train, Y_train)
     y_pred = clf.predict(X_test)
     # Convert labels to 0/1 for confusion matrix
