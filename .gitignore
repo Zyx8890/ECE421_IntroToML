@@ -3,3 +3,4 @@ Tutorials/
 .env/
 __pycache__/
 environment.yml
+report_outputs/
